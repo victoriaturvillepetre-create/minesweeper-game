@@ -1,0 +1,117 @@
+import random
+
+
+def create_board(size, num_mines):
+    # Initialize empty board
+    board = [[0 for _ in range(size)] for _ in range(size)]
+    mines_placed = 0
+
+    while mines_placed < num_mines:
+        x, y = random.randint(0, size-1), random.randint(0, size-1)
+        if board[x][y] != '*':
+            board[x][y] = '*'  # Mark as mine
+            mines_placed += 1
+
+    return board
+
+
+# Example: 5x5 board with 10 mines
+game_board = create_board(5, 10)
+for row in game_board:
+    print(row)
+
+
+def get_size():
+    size = input("Enter the size of the board: ")
+
+    while True:
+        if size.isdigit():
+            if int(size) > 0 :
+                break
+            else:
+                size = input("Invalid input. Enter a size > 0 : ")
+        else:   
+            size = input("Invalid input. Enter a positive integer : ")
+
+    return int(size)
+
+
+def get_num_of_mines(size):
+    num_of_mines = input("Enter number of mines: ")
+
+    while True:
+        if num_of_mines.isdigit():
+            if int(num_of_mines) > 0 and int(num_of_mines) <= size**2:
+                break
+            else:
+                num_of_mines = input(f"Invalid input. the number of mines within the range 1 ~ {size**2}: ")
+        else:   
+            num_of_mines = input("Invalid input. Enter a positive integer : ")
+
+    return int(num_of_mines)
+
+
+def get_coordinate(size):
+    
+    x_coordinate = input("Enter the x-coordinate: ")
+    while True:
+        if x_coordinate.isdigit():
+            if int(x_coordinate) >= 0 and int(x_coordinate) <= size-1:
+                break
+            else:
+                x_coordinate = input(f"Invalid input. the x_coordinate range 0 ~ {size-1}: ")
+        else:   
+            x_coordinate = input("Invalid input. Enter a integer : ")
+    
+    y_coordinate = input("Enter the y-coordinate: ")
+    while True:
+        if y_coordinate.isdigit():
+            if int(y_coordinate) >= 0 and int(y_coordinate) <= size-1:
+                break
+            else:
+                y_coordinate = input(f"Invalid input. the y_coordinate range 0 ~ {size-1}: ")
+        else:   
+            y_coordinate = input("Invalid input. Enter a integer : ")
+    
+    return int(x_coordinate), int(y_coordinate)
+
+
+def check_coordinate(gb,size):
+    
+    coordinate=get_coordinate(size)
+    x = coordinate[0]
+    y = coordinate[1]
+
+    print("Checking...")
+    print(x, y)
+    print(gb[x][y])
+
+    return gb[x][y]
+
+
+def ifboom(sweepe):  
+
+    change_in_health=0 
+
+    if sweepe == "*":   
+        print("BOOM")
+        change_in_health=-1
+    else:
+        print("no BOOM")
+
+    return change_in_health
+
+
+grid_survived=0
+health=5
+size = get_size()
+num_mines = get_num_of_mines(size)
+game_board = create_board(size, num_mines)
+
+while health>0:
+    sweepe=check_coordinate(game_board,size)    
+    health=health+ifboom(sweepe)
+    grid_survived=grid_survived+1
+    print(f"Health: {health} \n Grid survived so far: {grid_survived}")
+
+print(f"You survived {grid_survived} times")
