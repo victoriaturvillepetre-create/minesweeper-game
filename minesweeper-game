@@ -20,7 +20,7 @@ def create_board2(size, sweeped_coordinate):
     board = [[0 for _ in range(size)] for _ in range(size)]
 
     for row, col in sweeped_coordinate:
-        board[row][col] = '1'
+        board[row][col] = 1
 
     for row in board:
         print(row)
@@ -81,17 +81,20 @@ def get_coordinate(size):
     return int(x_coordinate), int(y_coordinate)
 
 
-def check_coordinate(gb,size,):
+def check_coordinate(game_board,size,sweeped_coordinate):
     
     coordinate=get_coordinate(size)
-    x = coordinate[0]
-    y = coordinate[1]
-
+    if coordinate not in sweeped_coordinate:
+        x = coordinate[0]
+        y = coordinate[1]
+    else:   
+        print("coordinate sweeped. re-enter")
+        coordinate=get_coordinate(size)
     print("Checking...")
     print(x, y)
-    print(gb[x][y])
+    print(game_board[x][y])
 
-    return coordinate, gb[x][y]
+    return coordinate, game_board[x][y]
 
 
 def ifboom(sweepe):  
@@ -115,7 +118,7 @@ num_mines = get_num_of_mines(size)
 game_board = create_board(size, num_mines)
 
 while health>0:
-    sweepe=check_coordinate(game_board,size)    
+    sweepe=check_coordinate(game_board,size,sweeped_coordinate)    
     sweeped_coordinate.append(sweepe[0])
     health=health+ifboom(sweepe[1])
     grid_survived=grid_survived+1
@@ -123,4 +126,3 @@ while health>0:
     print(create_board2(size, sweeped_coordinate))
     
 print(f"You survived {grid_survived} times")
-
