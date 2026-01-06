@@ -1,3 +1,4 @@
+
 import random
 
 
@@ -15,10 +16,14 @@ def create_board(size, num_mines):
     return board
 
 
-# Example: 5x5 board with 10 mines
-game_board = create_board(5, 10)
-for row in game_board:
-    print(row)
+def create_board2(size, sweeped_coordinate):
+    board = [[0 for _ in range(size)] for _ in range(size)]
+
+    for row, col in sweeped_coordinate:
+        board[row][col] = '1'
+
+    for row in board:
+        print(row)
 
 
 def get_size():
@@ -61,7 +66,7 @@ def get_coordinate(size):
             else:
                 x_coordinate = input(f"Invalid input. the x_coordinate range 0 ~ {size-1}: ")
         else:   
-            x_coordinate = input("Invalid input. Enter a integer : ")
+            x_coordinate = input("Invalid input. Enter a positive integer : ")
     
     y_coordinate = input("Enter the y-coordinate: ")
     while True:
@@ -71,12 +76,12 @@ def get_coordinate(size):
             else:
                 y_coordinate = input(f"Invalid input. the y_coordinate range 0 ~ {size-1}: ")
         else:   
-            y_coordinate = input("Invalid input. Enter a integer : ")
+            y_coordinate = input("Invalid input. Enter a positive integer : ")
     
     return int(x_coordinate), int(y_coordinate)
 
 
-def check_coordinate(gb,size):
+def check_coordinate(gb,size,):
     
     coordinate=get_coordinate(size)
     x = coordinate[0]
@@ -86,7 +91,7 @@ def check_coordinate(gb,size):
     print(x, y)
     print(gb[x][y])
 
-    return gb[x][y]
+    return coordinate, gb[x][y]
 
 
 def ifboom(sweepe):  
@@ -103,6 +108,7 @@ def ifboom(sweepe):
 
 
 grid_survived=0
+sweeped_coordinate=[]
 health=5
 size = get_size()
 num_mines = get_num_of_mines(size)
@@ -110,8 +116,11 @@ game_board = create_board(size, num_mines)
 
 while health>0:
     sweepe=check_coordinate(game_board,size)    
-    health=health+ifboom(sweepe)
+    sweeped_coordinate.append(sweepe[0])
+    health=health+ifboom(sweepe[1])
     grid_survived=grid_survived+1
-    print(f"Health: {health} \n Grid survived so far: {grid_survived}")
-
+    print(f"Health: {health} \nGrid survived so far: {grid_survived} \nSweeped coordinate:{sweeped_coordinate}")
+    print(create_board2(size, sweeped_coordinate))
+    
 print(f"You survived {grid_survived} times")
+
