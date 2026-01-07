@@ -1,0 +1,202 @@
+
+import random
+import tkinter as tk
+from PIL import Image, ImageTk, ImageSequence
+
+
+class GifPlayer:
+    def __init__(self, root, gif_path):
+        self.root = root
+        self.root.title("GIF Display")
+
+        # Load the GIF using Pillow
+        self.img = Image.open(gif_path)
+        
+        # Extract each frame from the GIF
+        self.frames = [ImageTk.PhotoImage(frame.copy().convert("RGBA")) 
+                       for frame in ImageSequence.Iterator(self.img)]
+        
+        self.frame_count = len(self.frames)
+        self.current_frame = 0
+
+        # Create a label to hold the image
+        self.label = tk.Label(root)
+        self.label.pack()
+
+        # Start the animation
+        self.update_frame()
+
+    def update_frame(self):
+        # Select the current frame
+        frame = self.frames[self.current_frame]
+        self.label.configure(image=frame)
+
+        # Move to the next frame, looping back to the start
+        self.current_frame = (self.current_frame + 1) % self.frame_count
+
+        # Get the duration of the frame from the GIF metadata (default to 100ms)
+        duration = self.img.info.get('duration', 100)
+
+        # Schedule the next update
+        self.root.after(duration, self.update_frame)
+
+
+def create_board(size, num_mines):
+
+    # Initialize empty board
+    board = [[0 for _ in range(size)] for _ in range(size)]
+    mines_placed = 0
+
+    while mines_placed < num_mines:
+        x, y = random.randint(0, size-1), random.randint(0, size-1)
+        if board[x][y] != '*':
+            board[x][y] = '*'  # Mark as mine
+            mines_placed += 1
+
+    return board
+
+
+def create_board2(size, sweeped_coordinate):
+
+    board = [[0 for _ in range(size)] for _ in range(size)]
+
+    for row, col in sweeped_coordinate:
+        board[row][col] = 1
+    
+    col_number = "   "
+    for i in range(size):
+        col_number = col_number + "  " + str(i)
+    print(col_number,"\n")
+
+    row_number = 0
+    for row in board:
+        print(row_number," ",row)
+        row_number = row_number + 1
+
+
+def get_size():
+
+    size = input("Enter the size of the board: ")
+
+    while True:
+        if size.isdigit():
+            if int(size) > 0 :
+                break
+            else:
+                size = input("Invalid input. Enter a size > 0 : ")
+        else:   
+            size = input("Invalid input. Enter a positive integer : ")
+
+    return int(size)
+
+
+def get_num_of_mines(size):
+
+    num_of_mines = input("Enter number of mines: ")
+
+    while True:
+        if num_of_mines.isdigit():
+            if int(num_of_mines) > 0 and int(num_of_mines) <= size**2:
+                break
+            else:
+                num_of_mines = input(f"Invalid input. the number of mines within the range 1 ~ {size**2}: ")
+        else:   
+            num_of_mines = input("Invalid input. Enter a positive integer : ")
+
+    return int(num_of_mines)
+
+
+def get_coordinate(size):
+    
+    x_coordinate = input("Enter the x-coordinate: ")
+    while True:
+        if x_coordinate.isdigit():
+            if int(x_coordinate) >= 0 and int(x_coordinate) <= size-1:
+                break
+            else:
+                x_coordinate = input(f"Invalid input. the x_coordinate range 0 ~ {size-1}: ")
+        else:   
+            x_coordinate = input("Invalid input. Enter \"0\" or a positive integer : ")
+    
+    y_coordinate = input("Enter the y-coordinate: ")
+    while True:
+        if y_coordinate.isdigit():
+            if int(y_coordinate) >= 0 and int(y_coordinate) <= size-1:
+                break
+            else:
+                y_coordinate = input(f"Invalid input. the y_coordinate range 0 ~ {size-1}: ")
+        else:   
+            y_coordinate = input("Invalid input. Enter \"0\" or a positive integer : ")
+    
+    return int(x_coordinate), int(y_coordinate)
+
+
+def check_coordinate(game_board, size, sweeped_coordinate):
+
+    x = 0
+    y = 0
+
+    coordinate = get_coordinate(size)
+    while True:
+        if coordinate not in sweeped_coordinate:
+            x = coordinate[0]
+            y = coordinate[1]
+            break
+        else:   
+            print("coordinate sweeped. re-enter")
+            coordinate = get_coordinate(size)
+            
+    print("Checking...")
+    print(x, y)
+    print(game_board[x][y])
+
+    return coordinate, game_board[x][y]
+
+
+def ifboom(sweepe):  
+
+    change_in_health = 0 
+
+    if sweepe == "*":   
+        print("BOOM")
+        
+        if __name__ == "__main__":
+            root = tk.Tk()
+            # Ensure the filename matches your file exactly
+            file_path = "explosion-explode.gif"
+            try:
+                player = GifPlayer(root, file_path)
+                player.update_frame()
+                root.focus_force()
+                root.attributes('-topmost', True)
+                root.after(2500, root.destroy)
+                root.mainloop()
+            except FileNotFoundError:
+                print(f"Error: The file '{file_path}' was not found in this directory.")
+            
+        change_in_health = -1
+    else:
+        print("no BOOM")
+
+    return change_in_health
+
+
+sweepe_survived = 0
+sweeped_coordinate = []
+health = 5
+size = get_size()
+num_mines = get_num_of_mines(size)
+game_board = create_board(size, num_mines)
+
+while health > 0 and sweepe_survived < size**2:
+    sweepe = check_coordinate(game_board,size,sweeped_coordinate)    
+    sweeped_coordinate.append(sweepe[0])
+    health = health + ifboom(sweepe[1])
+    sweepe_survived = sweepe_survived+1
+    print(f"Health: {health} \nCoordinate sweepe so far: {sweepe_survived} \nSweeped coordinate: {sweeped_coordinate}")
+    print(create_board2(size, sweeped_coordinate))
+
+if health > 0:
+    print(f"You have sweeped {sweepe_survived} coordinate and survived. \nWell Done!")
+else:
+    print(f"You have sweeped {sweepe_survived} coordinate and died. \nGame Over!")
