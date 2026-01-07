@@ -1,60 +1,44 @@
 
 import random
-
 import tkinter as tk
+from PIL import Image, ImageTk, ImageSequence
 
 
-def boom():
-    
-    from PIL import Image, ImageTk, ImageSequence
+class GifPlayer:
+    def __init__(self, root, gif_path):
+        self.root = root
+        self.root.title("GIF Display")
 
-    class GifPlayer:
-        def __init__(self, root, gif_path):
-            self.root = root
-            self.root.title("GIF Display")
-
-            # Load the GIF using Pillow
-            self.img = Image.open(gif_path)
-            
-            # Extract each frame from the GIF
-            self.frames = [ImageTk.PhotoImage(frame.copy().convert("RGBA")) 
-                        for frame in ImageSequence.Iterator(self.img)]
-            
-            self.frame_count = len(self.frames)
-            self.current_frame = 0
-
-            # Create a label to hold the image
-            self.label = tk.Label(root)
-            self.label.pack()
-
-            # Start the animation
-            self.update_frame()
-
-        def update_frame(self):
-            # Select the current frame
-            frame = self.frames[self.current_frame]
-            self.label.configure(image=frame)
-
-            # Move to the next frame, looping back to the start
-            self.current_frame = (self.current_frame + 1) % self.frame_count
-
-            # Get the duration of the frame from the GIF metadata (default to 100ms)
-            duration = self.img.info.get('duration', 100)
-
-            # Schedule the next update
-            self.root.after(duration, self.update_frame)
-
-    if __name__ == "__main__":
-        root = tk.Tk()
+        # Load the GIF using Pillow
+        self.img = Image.open(gif_path)
         
-        # Ensure the filename matches your file exactly
-        file_path = "explosion-explode.gif"
+        # Extract each frame from the GIF
+        self.frames = [ImageTk.PhotoImage(frame.copy().convert("RGBA")) 
+                       for frame in ImageSequence.Iterator(self.img)]
         
-        try:
-            player = GifPlayer(root, file_path)
-            root.mainloop()
-        except FileNotFoundError:
-            print(f"Error: The file '{file_path}' was not found in this directory.")
+        self.frame_count = len(self.frames)
+        self.current_frame = 0
+
+        # Create a label to hold the image
+        self.label = tk.Label(root)
+        self.label.pack()
+
+        # Start the animation
+        self.update_frame()
+
+    def update_frame(self):
+        # Select the current frame
+        frame = self.frames[self.current_frame]
+        self.label.configure(image=frame)
+
+        # Move to the next frame, looping back to the start
+        self.current_frame = (self.current_frame + 1) % self.frame_count
+
+        # Get the duration of the frame from the GIF metadata (default to 100ms)
+        duration = self.img.info.get('duration', 100)
+
+        # Schedule the next update
+        self.root.after(duration, self.update_frame)
 
 
 def create_board(size, num_mines):
@@ -175,7 +159,21 @@ def ifboom(sweepe):
 
     if sweepe == "*":   
         print("BOOM")
-        #boom()
+        
+        if __name__ == "__main__":
+            root = tk.Tk()
+            # Ensure the filename matches your file exactly
+            file_path = "explosion-explode.gif"
+            try:
+                player = GifPlayer(root, file_path)
+                player.update_frame()
+                root.focus_force()
+                root.attributes('-topmost', True)
+                root.after(2500, root.destroy)
+                root.mainloop()
+            except FileNotFoundError:
+                print(f"Error: The file '{file_path}' was not found in this directory.")
+            
         change_in_health = -1
     else:
         print("no BOOM")
